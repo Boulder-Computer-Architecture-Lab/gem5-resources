@@ -21,12 +21,6 @@ apt-get install -y git
 apt-get install -y vim
 apt-get install -y build-essential
 
-# Add parsec environment setup to bashrc in the gem5 user account
-echo "Adding parsec's env.sh to the gem5 user's .bashrc."
-
-# Make after_boot.sh executable
-chmod a+x /home/gem5/after_boot.sh
-
 # Add after_boot.sh to bashrc in the gem5 user account
 # This will run the script after the user automatically logs in
 echo "Adding after_boot.sh to the gem5 user's .bashrc."

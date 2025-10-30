@@ -9,7 +9,7 @@ packer {
 
 variable "image_name" {
   type    = string
-  default = "arm-parsec"
+  default = "arm-spec2017"
 }
 
 variable "ssh_password" {
@@ -93,8 +93,8 @@ source "qemu" "initialize" {
                       "<enter>",
                       "<wait>"
                       ]
-  cpus             = "8"
-  disk_size        = "18000"
+  cpus             = "4"
+  disk_size        = "4600"
   format           = "raw"
   headless         = "true"
   http_directory   = local.iso_data[var.ubuntu_version].http_directory
@@ -140,6 +140,11 @@ build {
     source      = "${local.iso_data[var.ubuntu_version].modules_dir}"
   }
 
+  provisioner "file" {
+    destination = "/home/gem5/"
+    source      = "files/cpu2017-1.1.0.iso"
+  }
+
   provisioner "shell" {
     execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'"
     scripts         = ["scripts/install-common-packages.sh",
@@ -148,10 +153,14 @@ build {
                        "scripts/update-gem5-init.sh",
                        "scripts/install-gem5-bridge.sh",
                        "scripts/install-user-packages.sh",
-                       "scripts/install-parsec.sh"
+                       "scripts/install-spec2017.sh",
                       ]
     environment_vars = ["ISA=arm64"]
     expect_disconnect = true
+  }
+
+  provisioner "shell" {
+    scripts =  ["scripts/install-user-benchmarks.sh"]
   }
 
   provisioner "shell" {

@@ -59,7 +59,7 @@ autoinstall:
       type: partition
       id: partition-0
     - device: disk-vda
-      size: 10734272512  
+      size: 26843545600    
       wipe: superblock
       number: 2
       preserve: false
@@ -78,3 +78,9 @@ autoinstall:
       id: mount-0
   updates: security
   version: 1
+  package_update: true
+  packages:
+    - openssh-server
+  late-commands:
+    - systemctl enable ssh
+    - systemctl start ssh

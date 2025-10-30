@@ -13,9 +13,9 @@ echo "12345" | sudo apt-get install -y build-essential libboost-all-dev
 
 git clone https://github.com/darchr/gapbs.git
 cd gapbs
-make
-wget http://www.diag.uniroma1.it/challenge9/data/USA-road-d/USA-road-d.LKS.gr.gz
-gzip -d USA-road-d.LKS.gr.gz
+make -j $(nproc)
+sed -i 's/^GRAPHS =.*/GRAPHS = road/' benchmark/bench.mk
+make bench-graphs -j $(nproc)
 cd ..
 
 echo "Done installing gapbs."

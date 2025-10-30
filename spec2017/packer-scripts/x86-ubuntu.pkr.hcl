@@ -9,7 +9,7 @@ packer {
 
 variable "image_name" {
   type    = string
-  default = "x86-gapbs"
+  default = "x86-spec2017"
 }
 
 variable "ssh_password" {
@@ -55,22 +55,26 @@ source "qemu" "initialize" {
                       "<f10><wait>"
                     ]
   cpus             = "8"
-  disk_size        = "12G"
+  disk_size        = "27G"
   format           = "raw"
   headless         = "true"
   http_directory   = "http/x86"
   iso_checksum     = local.iso_data[var.ubuntu_version].iso_checksum
   iso_urls         = [local.iso_data[var.ubuntu_version].iso_url]
-  memory           = "8192"
+  memory           = "16000"
   output_directory = local.iso_data[var.ubuntu_version].output_dir
-  qemu_binary      = "/usr/bin/qemu-system-x86_64"
-  qemuargs         = [["-cpu", "host"], ["-display", "none"]]
+  qemu_binary       = "/usr/bin/qemu-system-x86_64"
+  qemuargs         = [
+      ["-cpu", "host"],
+      ["-display", "none"],
+    ]
   shutdown_command = "echo '${var.ssh_password}'|sudo -S shutdown -P now"
   ssh_password     = "${var.ssh_password}"
   ssh_username     = "${var.ssh_username}"
-  ssh_wait_timeout = "60m"
+  ssh_wait_timeout = "120m"
   vm_name          = "${var.image_name}"
-  ssh_handshake_attempts = "1000"
+  boot_wait = "15s"
+  ssh_handshake_attempts = "2000"
 }
 
 build {
@@ -96,13 +100,18 @@ build {
     source      = "files/serial-getty@.service-override.conf"
   }
 
+  provisioner "file" {
+    destination = "/home/gem5/"
+    source      = "files/cpu2017-1.1.0.iso"
+  }
+
   provisioner "shell" {
     execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'"
     scripts         = ["scripts/install-common-packages.sh",
                        "scripts/extract-x86-kernel.sh",
                        "scripts/update-gem5-init.sh",
                        "scripts/install-gem5-bridge.sh",
-                       "scripts/install-gapbs.sh",
+                       "scripts/install-spec2017.sh",
                        "scripts/disable-systemd-services-x86.sh",
                        "scripts/disable-network.sh"
                       ]

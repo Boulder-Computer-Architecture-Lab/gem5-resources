@@ -17,13 +17,11 @@ printf "In after_boot.sh...\n"
 gem5-bridge hypercall 2
 
 printf "Starting gem5 init... trying to read run script file via readfile.\n"
-gem5-bridge readfile > /home/gem5/parsec-benchmark/script
-printf "Running script from gem5-bridge stored in /home/gem5/parsec-benchmark\n"
-chmod 755 /home/gem5/parsec-benchmark/script
-cd /home/gem5/parsec-benchmark
-. env.sh
+gem5-bridge readfile > /home/gem5/spec2017/script
+printf "Running script from gem5-bridge stored in /home/gem5/spec2017\n"
+chmod 755 /home/gem5/spec2017/script
 gem5-bridge hypercall 2
-/home/gem5/parsec-benchmark/script
+/home/gem5/spec2017/script
 printf "Done running script from gem5-bridge, exiting.\n"
-rm -f /home/gem5/parsec-benchmark/script
+rm -f /home/gem5/spec2017/script
 gem5-bridge hypercall 3

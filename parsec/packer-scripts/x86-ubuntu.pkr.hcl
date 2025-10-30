@@ -55,7 +55,7 @@ source "qemu" "initialize" {
                       "<f10><wait>"
                     ]
   cpus             = "8"
-  disk_size        = "16000"
+  disk_size        = "25000"
   format           = "raw"
   headless         = "true"
   http_directory   = "http/x86"
@@ -102,18 +102,11 @@ build {
                        "scripts/extract-x86-kernel.sh",
                        "scripts/update-gem5-init.sh",
                        "scripts/install-gem5-bridge.sh",
-                       "scripts/install-user-packages.sh",
-                       "scripts/install-parsec.sh"
+                       "scripts/install-parsec.sh",
+                       "scripts/disable-systemd-services-x86.sh",
+                       "scripts/disable-network.sh"
                       ]
     environment_vars = ["ISA=x86"]
-    expect_disconnect = true
-  }
-
-  provisioner "shell" {
-    execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'"
-    scripts = ["scripts/disable-systemd-services-x86.sh",
-               "scripts/disable-network.sh"
-              ]
     expect_disconnect = true
   }
 
