@@ -70,6 +70,29 @@ find . -name "input_native.tar" | while read tarfile; do
     )
 done
 
+# Create run directories
+for TYPE in apps kernels netapps; do
+    for BENCH in "pkgs/$TYPE"/*; do
+        [ -d "$BENCH" ] || continue
+
+        RUN="$BENCH/run"
+        INPUT="$BENCH/inputs"
+
+        echo "Processing: $BENCH"
+
+        mkdir -p "$RUN"
+
+        # Recursively move all input contents into run/
+        if [ -d "$INPUT" ]; then
+            rsync -a "$INPUT"/ "$RUN"/
+            rm -rf "$INPUT"
+        fi
+
+        # Create benchmark.out inside run/
+        touch "$RUN/benchmark.out"
+    done
+done
+
 cd ..
 echo "12345" | sudo -S chown gem5 -R parsec-benchmark/
 echo "12345" | sudo -S chgrp gem5 -R parsec-benchmark/
