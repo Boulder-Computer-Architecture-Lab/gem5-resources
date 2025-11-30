@@ -15,3 +15,5 @@ m5out
 .*.swo
 .vscode
 *.iso
+
+spec2017/files/cpu2017/*
