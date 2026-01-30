@@ -1,0 +1,3 @@
+[submodule "riscv-bootloader/opensbi"]
+	path = riscv-bootloader/opensbi
+	url = https://github.com/riscv-software-src/opensbi
