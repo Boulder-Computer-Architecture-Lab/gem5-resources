@@ -8,14 +8,13 @@ sed -i 's/false/true/g' libs.txt
 while read line; do echo $line | sudo debconf-set-selections; done < libs.txt
 sudo rm libs.txt
 
-sudo apt install -y git
-echo "12345" | sudo apt-get install -y build-essential libboost-all-dev
+echo "12345" | sudo apt-get install -y git build-essential libboost-all-dev
 
 git clone https://github.com/darchr/gapbs.git
 cd gapbs
 make -j $(nproc)
+# Only derive the road benchmark
 sed -i 's/^GRAPHS =.*/GRAPHS = road/' benchmark/bench.mk
 make bench-graphs -j $(nproc)
-cd ..
 
 echo "Done installing gapbs."
