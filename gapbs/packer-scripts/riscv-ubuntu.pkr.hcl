@@ -22,43 +22,30 @@ variable "ssh_username" {
   default = "gem5"
 }
 
-
-locals {
-  iso_data = {
-    iso_url       = "./../tmp/ubuntu-24.04-preinstalled-server-riscv64.img"
-    iso_checksum  = "sha256:9f1010bfff3d3b2ed3b174f121c5b5002f76ae710a6647ebebbc1f7eb02e63f5"
-    output_dir    = "riscv-disk-image-24-04"
-  }
-}
-
 source "qemu" "initialize" {
-  cpus             = "10"
+  cpus             = "4"
+  disk_size        = "10G"
   format           = "raw"
   headless         = "true"
   disk_image       = "true"
   boot_command = [
-                  "<wait10><enter>",
-                  "<wait80>",
-                  "ubuntu<enter><wait>",
-                  "ubuntu<enter><wait>",
-                  "ubuntu<enter><wait>",
-                  "12345678<enter><wait>",
-                  "12345678<enter><wait>",
-                  "<wait20>",
-                  "sudo adduser gem5<enter><wait10>",
+                 "<wait120>", // If the build process is hanging during login, the `<wait>` commands may need to be adjusted.
+                  "gem5<enter><wait10>",
                   "12345<enter><wait10>",
+                  "sudo mount -o remount,rw /<enter><wait10>", // remounting system as read-write as qemu does not like that we have m5 exits in the boot process so it mounts system as read ony.
                   "12345<enter><wait10>",
-                  "<enter><enter><enter><enter><enter>y<enter><wait>",
-                  "sudo usermod -aG sudo gem5<enter><wait>",
-                  "sudo sh -c 'echo \"export DEBIAN_FRONTEND=noninteractive\" > /etc/profile.d/debian_noninteractive.sh'<enter><wait>",
-                  "sudo sh -c 'echo \"DEBIAN_FRONTEND=noninteractive\" >> /etc/environment'<enter><wait>",
-                  "sudo debconf-set-selections <<< \"debconf debconf/frontend select Noninteractive\"<enter><wait>",
-                  "sudo debconf-set-selections <<< \"debconf debconf/priority select critical\"<enter><wait>"
+                  "sudo growpart /dev/vda 1<enter><wait10>",
+                  "12345<enter><wait10>",
+                  "sudo resize2fs /dev/vda1<enter><wait10>",
+                  "12345<enter><wait10>",
+                  "sudo mv /etc/netplan/50-cloud-init.yaml.bak /etc/netplan/50-cloud-init.yaml<enter><wait10>",
+                  "sudo netplan apply<enter><wait10>",
+                  "<wait>"
                 ]
-  iso_checksum     = local.iso_data.iso_checksum
-  iso_urls         = [local.iso_data.iso_url]
-  memory           = "16384"
-  output_directory = local.iso_data.output_dir
+  iso_checksum     = "sha256:ddf1ebb56454ef37e88d6de8aefdef7180fc9a2328a3bf8cff02f7a043e7127b"
+  iso_urls         = ["./../tmp/riscv-ubuntu-24.04-20250515"]
+  memory           = "8192"
+  output_directory = "riscv-disk-image-24-04"
   qemu_binary      = "/usr/bin/qemu-system-riscv64"
 
   qemuargs       = [  ["-bios", "/usr/lib/riscv64-linux-gnu/opensbi/generic/fw_jump.elf"],
@@ -78,47 +65,8 @@ source "qemu" "initialize" {
 
 build {
   sources = ["source.qemu.initialize"]
-
-  provisioner "file" {
-    destination = "/home/gem5/"
-    source      = "../common/files/exit.sh"
-  }
-
-  provisioner "file" {
-    destination = "/home/gem5/"
-    source      = "../common/files/riscv/gem5_init.sh"
-  }
-
-  provisioner "file" {
-    destination = "/home/gem5/"
-    source      = "../common/files/riscv/after_boot.sh"
-  }
-
-  provisioner "file" {
-    destination = "/home/gem5/"
-    source      = "../common/files/serial-getty@.service-override.conf"
-  }
-
   provisioner "shell" {
     execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'"
-    scripts         = [
-                       "../common/scripts/install-common-packages.sh",
-                       "../common/scripts/update-modules-riscv.sh",
-                       "../common/scripts/update-gem5-init.sh",
-                       "../common/scripts/install-gem5-bridge.sh",
-                       "scripts/install-gapbs.sh"
-                      ]
-    environment_vars = ["ISA=riscv"]
-    expect_disconnect = true
-  }
-
-  provisioner "shell" {
-    execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'"
-    scripts         = [
-                       "../common/scripts/disable-systemd-services-riscv.sh",
-                       "../common/scripts/disable-network.sh"
-                      ]
-    environment_vars = ["ISA=riscv"]
-    expect_disconnect = true
+    scripts         = ["scripts/install-gapbs.sh"]
   }
 }
