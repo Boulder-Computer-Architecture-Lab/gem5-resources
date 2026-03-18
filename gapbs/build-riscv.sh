@@ -29,13 +29,11 @@ if [ ! -f ./packer ]; then
     rm "packer_${PACKER_VERSION}_linux_${PACKER_ARCH}.zip"
 fi
 
-ubuntu_version="24.04"
-
-if [ ! -f ./../tmp/ubuntu-24.04-preinstalled-server-riscv64.img ]; then
-    wget https://old-releases.ubuntu.com/releases/noble/ubuntu-24.04-preinstalled-server-riscv64.img.xz -O ./../tmp/ubuntu-24.04-preinstalled-server-riscv64.img.xz
-    unxz ./../tmp/ubuntu-24.04-preinstalled-server-riscv64.img.xz
+if [ ! -f ./../tmp/riscv-ubuntu-24.04-20250515 ]; then
+    wget https://dist.gem5.org/dist/develop/images/riscv/ubuntu-24-04/riscv-ubuntu-24.04-20250515.gz \
+        -O ./../tmp/riscv-ubuntu-24.04-20250515.gz
+    gunzip ../tmp/riscv-ubuntu-24.04-20250515.gz;
 fi
-OUTDIR="riscv-disk-image-24-04"
 
 rm -rf $OUTDIR
 

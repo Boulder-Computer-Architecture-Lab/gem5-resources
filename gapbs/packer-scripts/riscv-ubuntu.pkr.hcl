@@ -67,6 +67,11 @@ build {
   sources = ["source.qemu.initialize"]
   provisioner "shell" {
     execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'"
-    scripts         = ["scripts/install-gapbs.sh"]
+    scripts         = [
+                       "../common/scripts/install-common-packages.sh",
+                       "scripts/install-gapbs.sh"
+                      ]
+    environment_vars = ["ISA=riscv"]
+    expect_disconnect = true
   }
 }
